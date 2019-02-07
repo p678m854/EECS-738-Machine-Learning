@@ -52,7 +52,7 @@ def kmeans( nk = 1, data = numpy.empty((1,1)), epsilon = 0.01, looplimit = 100):
         newkmeans = numpy.zeros((nk,dimensions))
         for npoint in range(np):
             index = membership[npoint]
-            newkmeans[index] = data[npoint] / nmembers[index]
+            newkmeans[index] += data[npoint] / nmembers[index]
 
         #finding k means shift
         dkmeans = numpy.empty((nk,1))
@@ -69,6 +69,7 @@ def kmeans( nk = 1, data = numpy.empty((1,1)), epsilon = 0.01, looplimit = 100):
             #if loop is initially set as 0, then while loop
             #otherwise, it is essentially a for loop
             break
-
+    #Updating k means
+    kmeans = newkmeans
     #Outside of while loop
     return kmeans
