@@ -1,3 +1,4 @@
+
 # Inputs:
 #   nk is number of means to calculate
 #   data is the data to be used
@@ -6,11 +7,11 @@
 # Outputs:
 #   array of means
 
-import numpy as numpy
+import numpy as np
 import random as random
 
-def kmeans( nk = 1, data = numpy.empty((1,1)), epsilon = 0.01, looplimit = 100):
-    np = len(data) #number of data points
+def kmeans( nk = 1, data = np.empty((1,1)), epsilon = 0.01, looplimit = 100):
+    n_points = len(data) #number of data points
     dimension = len(data[0]) #dimensional size
 
     #finding minimum and maximum
@@ -18,7 +19,7 @@ def kmeans( nk = 1, data = numpy.empty((1,1)), epsilon = 0.01, looplimit = 100):
     maxarray = [0]*dimension
 
     #finding min and max
-    for i in range(np):
+    for i in range(n_points):
         for j in range(dimension):
             if data[j] < minarray[j]:
                 minarray[j] = data[j]
@@ -26,41 +27,41 @@ def kmeans( nk = 1, data = numpy.empty((1,1)), epsilon = 0.01, looplimit = 100):
                 maxarray[j] = data[j]
     
     #array for means
-    kmeans = numpy.zeros((nk,dimension))
+    kmeans = np.zeros((nk,dimension))
     #assigning a random start
     for i in range(nk):
         for j in range(dimension):
             kmeans[i][j] = random.uniform(minarray[j], maxarray[j])
     
     #memberhsip array for mean recalculations
-    membership = numpy.empty((np,1))
+    membership = np.empty((np,1))
 
     #kmeans looping
     while 1:
         #membership assignment
-        nmembers = numpyempty((nk,1))
-        for npoint in range(np):
+        nmembers = np.empty((nk,1))
+        for npoint in range(n_points):
             costarray = [0] * nk
             nmembers = [0] * nk
             for i in range(nk):
-                costarray[i] = numpy.linalg.norm(kmeans[i] - data[npoint])
+                costarray[i] = np.linalg.norm(kmeans[i] - data[npoint])
             minindex = costarray.argmin()
             membership[npoint] = minindex
             nmembers[minindex] += 1
 
         #recalculation of means
-        newkmeans = numpy.zeros((nk,dimensions))
-        for npoint in range(np):
+        newkmeans = np.zeros((nk,dimension))
+        for npoint in range(n_points):
             index = membership[npoint]
             newkmeans[index] += data[npoint] / nmembers[index]
 
         #finding k means shift
         dkmeans = numpy.empty((nk,1))
         for index in range(nk):
-            dkmeans[index] = numpy.linalg.norm(kmeans[index] - newkmeans[index]) /\
-                             numpy.linalg.norm(kmeans[index])
+            dkmeans[index] = np.linalg.norm(kmeans[index] - newkmeans[index]) /\
+                             np.linalg.norm(kmeans[index])
         #Epsilon condition break
-        if numpy.amax(dkmeans) < epsilon:
+        if np.amax(dkmeans) < epsilon:
             break
 
         #Loop break
@@ -73,3 +74,4 @@ def kmeans( nk = 1, data = numpy.empty((1,1)), epsilon = 0.01, looplimit = 100):
     kmeans = newkmeans
     #Outside of while loop
     return kmeans
+
