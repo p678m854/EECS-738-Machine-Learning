@@ -64,7 +64,11 @@ iterations = 50  # maximum number of training iterations.
 k_means = k_means(train_data, clusters)
 
 # Train k_means instance.
-(centroids, nearest_centroid) = k_means.train(iterations)
+#(centroids, nearest_centroid) = k_means.train(iterations)
+(centroids, nearest_centroid) =k_means.kmeansOpt(train_data)
+
+
+
 
 # Plot actual clusters for reference
 plt.subplot(2,2,3)

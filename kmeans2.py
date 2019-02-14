@@ -4,6 +4,7 @@ This file will determine centroids, centroid membership, and kmeans.
 """
 
 import numpy as np
+from equations import F_test, CHtest, mdvar
 
 
 class k_means:
@@ -125,3 +126,41 @@ class k_means:
             )
 
         return centroids, nearest_centroid
+
+    """
+    kmeansOpt: Optimized number of clusters for data set in K-means algorithm 
+    Inputs: data       == data set of interest
+            Ftestlim   ==  upperbounds of F testing (F test should converge to 1)
+            kmeansIter == Iterations for K-means algorithm
+    Outputs: kopt == Optimal K in K-means based on Calinski-Harabasz index
+    """
+
+
+    def kmeansOpt(self,data):
+        # loop preallocations
+        clusters = 2  # Clusterings start at 2
+        Ftest = 0  # Initialize F test results
+        CHList = np.zeros((1, 1))  # List of CH index results
+        limit = 0.95
+
+
+        print(Ftest)
+        print(limit)
+        # While loop
+        while Ftest < limit:
+            #k_means = k_means(data, clusters)  # initialize kmeans and post indent clusters
+
+            (centroids, nearestCent) = k_means.train(data,100)  # train K-means for kmeansIter iterations
+            Ftest = F_test(data, centroids, nearestCent)  # F test for loop conditions
+
+            # update CHlist
+            if CHList[0] == 0:
+                CHList[0] = CHtest(data, centroids, nearestCent)
+                clusters += 1
+            else:
+                CHList.append(CHtest(data, centroids, nearestCent))
+                clusters += 1
+
+                # return opt K for K-means
+
+        return CHList.argmax() + 2
