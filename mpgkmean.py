@@ -53,7 +53,15 @@ plt.title('Initial Data(No Labels)')
 n_data = data.shape[0]
 
 # Get features.
-train_data = data[[x_axis, y_axis]].values.reshape((n_data, 2))
+train_data = data[[x_axis, y_axis, 'cylinders']].values.reshape((n_data, 3))
+
+#Normalizing data columns so everything exists between -1 and 1
+train_data_mean = np.mean(np.abs(train_data), axis = 0)
+for j in range(train_data.shape[1]):
+    train_data[:,j] -= train_data_mean[j]
+train_data_scale = np.max(train_data, axis=0)
+for j in range(train_data.shape[1]):
+    train_data[:,j] /= train_data_scale[j]
 
 # Enter k_means inputs.
 clusters = 3  # Number of clusters into which we want to split our training dataset.
@@ -65,10 +73,15 @@ k_means = k_means(train_data, clusters)
 
 # Train k_means instance.
 #(centroids, nearest_centroid) = k_means.train(iterations)
-(centroids, nearest_centroid) =k_means.kmeansOpt(train_data)
+(centroids, nearest_centroid) = k_means.kmeansOpt()
 
-
-
+# Denormalizing column vectors
+for j in range(train_data.shape[1]):
+    train_data[:,j] *= train_data_scale[j]
+    centroids[:,j] *= train_data_scale[j]
+for j in range(train_data.shape[1]):
+    train_data[:,j] += train_data_mean[j]
+    centroids[:,j] += train_data_mean[j]
 
 # Plot actual clusters for reference
 plt.subplot(2,2,3)

@@ -15,7 +15,7 @@ import numpy as np
 
 def CHtest(data, centroids, nearestCent):
 	#Overall method characteristics
-  d_mean = np.mean(data, axis = 0) #vector mean of data
+	d_mean = np.mean(data, axis = 0) #vector mean of data
 	TSS = mdvar(data, d_mean) #total sum of squares
 	N = data.shape[0] #number of data points
 	K = centroids.shape[0] #number of centroids

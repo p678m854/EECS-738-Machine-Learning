@@ -16,5 +16,6 @@ def mdvar(data, mean):
 	N = data.shape[0] #Number of data points
 	
 	for i in range(N):
-		
+		RSS += (np.linalg.norm(data[i, :] - mean)) ** 2
+
 	return RSS

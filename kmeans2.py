@@ -4,7 +4,7 @@ This file will determine centroids, centroid membership, and kmeans.
 """
 
 import numpy as np
-from equations import F_test, CHtest, mdvar
+from equations import relSSECalc, CHtest, mdvar
 
 
 class k_means:
@@ -14,7 +14,7 @@ class k_means:
         """K Means class constructor
         Inputs:
         data: data to be processed
-        clusters: number of clusters for the data
+        clusters: number of clusters for the data 
         Returns:
         none
         """
@@ -22,7 +22,7 @@ class k_means:
         self.clusters = clusters
 
 
-    def create_centroids(data, clusters):
+    def create_centroids(self):
         """
         Creates how many centroids are wanted for the given daataset
         inputs:
@@ -33,19 +33,19 @@ class k_means:
         """
 
         # Get number of training examples.
-        n_data = data.shape[0]
+        n_data = self.data.shape[0]
 
         # Randomly reorder indices of training examples.
         random_ids = np.random.permutation(n_data)
 
         # Take the first K examples as centroids.
-        centroids = data[random_ids[:clusters], :]
+        centroids = self.data[random_ids[:self.clusters], :]
 
         # Return generated centroids.
         return centroids
 
 
-    def nearest_centroid(data, centroids):
+    def nearest_centroid(self, centroids):
         """
         Finds the nearest centroid for each data point.
         inputs:
@@ -56,7 +56,8 @@ class k_means:
         """
 
         # Get number of training examples.
-        n_data = data.shape[0]
+        n_data = self.data.shape[0]
+        features = self.data.shape[1]
 
         # Get number of centroids.
         n_centroids = centroids.shape[0]
@@ -68,14 +69,14 @@ class k_means:
         for data_point in range(n_data):
             distances = np.zeros((n_centroids, 1))
             for which_centroid in range(n_centroids):
-                distance_difference = data[data_point, :] - centroids[which_centroid, :]
-                distances[which_centroid] = np.sum(distance_difference ** 2)
+                for j in range(features):
+                    distances[which_centroid] += (self.data[data_point, j] - centroids[which_centroid, j]) ** 2
             nearest_centroid[data_point] = np.argmin(distances)
 
         return nearest_centroid
 
 
-    def place_centroids(data, nearest_centroid, clusters):
+    def place_centroids(self, nearest_centroid):
         """
         Places the centroids according to the means of the data points that were assigned to it.
         inputs:
@@ -85,19 +86,19 @@ class k_means:
         """
 
         # Get number of features.
-        features = data.shape[1]
+        features = self.data.shape[1]
 
         # create starting points for all the centroid ids.
-        centroids = np.zeros((clusters, features))
+        centroids = np.zeros((self.clusters, features))
 
         # calculate the means for the data points associated with a centroid
-        for centroid in range(clusters):
+        for centroid in range(self.clusters):
             associated_centroid = nearest_centroid == centroid
-            centroids[centroid] = np.mean(data[associated_centroid.flatten(), :], axis=0)
+            centroids[centroid] = np.mean(self.data[associated_centroid.flatten(), :], axis=0)
 
         return centroids
 
-    def train(self, iterations):
+    def train(self, iterations = 100):
         """
         This function will use K-Means algorithm to cluster the data
         Inputs:
@@ -107,7 +108,7 @@ class k_means:
         """
 
         # Generate random centroids based on training set.
-        centroids = k_means.create_centroids(self.data, self.clusters)
+        centroids = k_means.create_centroids(self)
 
         # create an empty array for nearest centroids
         num_examples = self.data.shape[0]
@@ -120,9 +121,8 @@ class k_means:
 
             # Compute means based on the closest centroids found in the previous part.
             centroids = k_means.place_centroids(
-                self.data,
+                self,
                 nearest_centroid,
-                self.clusters
             )
 
         return centroids, nearest_centroid
@@ -136,31 +136,31 @@ class k_means:
     """
 
 
-    def kmeansOpt(self,data):
+    def kmeansOpt(self, SSELimit = 0.0001, innerIterLim = 100):
         # loop preallocations
-        clusters = 2  # Clusterings start at 2
-        Ftest = 0  # Initialize F test results
-        CHList = np.zeros((1, 1))  # List of CH index results
-        limit = 0.95
+        self.clusters = 1  # Clusterings start at 1 and increments at top of loop
+        
+        # Preallocating CH and F-test limits
+        relativeSSE = 1  # Initialize Relative Sum of Squared Error test results
+        CHList = []  # List of CH index results
+        iterCount = 0
 
-
-        print(Ftest)
-        print(limit)
         # While loop
-        while Ftest < limit:
+        while relativeSSE > SSELimit:
+            self.clusters += 1
+            iterCount += 1
             #k_means = k_means(data, clusters)  # initialize kmeans and post indent clusters
+            (centroids, nearestCent) = k_means.train(self,innerIterLim)  # train K-means for kmeansIter iterations
+            
+            CHList.append(CHtest(self.data, centroids, nearestCent)) # update CHlist
+            relativeSSE = relSSECalc(self.data, centroids, nearestCent)  # F test for loop conditions
 
-            (centroids, nearestCent) = k_means.train(data,100)  # train K-means for kmeansIter iterations
-            Ftest = F_test(data, centroids, nearestCent)  # F test for loop conditions
-
-            # update CHlist
-            if CHList[0] == 0:
-                CHList[0] = CHtest(data, centroids, nearestCent)
-                clusters += 1
-            else:
-                CHList.append(CHtest(data, centroids, nearestCent))
-                clusters += 1
-
-                # return opt K for K-means
-
-        return CHList.argmax() + 2
+            #Printing loop information
+            print("Iteration: ",iterCount)
+            print("Clusters: ",self.clusters)
+            print("Relative unexplained variance results: ",relativeSSE)
+            print("CH-index test: ",CHList[-1],"\n")
+        # return opt K for K-means
+        self.clusters = (CHList.index(max(CHList)) + 2)
+        (centroids, nearestCent) = k_means.train(self, 100)
+        return centroids, nearestCent
