@@ -7,6 +7,10 @@ Tim Fox (tfoxkustudent)
 # Algorithm
 K-means with a K optimizer using the Calinski-Harabasz index
 
+# Run Files
+1) cluster_cylinders.py
+2) flower_clusters.py
+
 # Data Sets
 mpg.csv and Iris.csv
 
