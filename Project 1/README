@@ -9,3 +9,7 @@ K-means with a K optimizer using the Calinski-Harabasz index
 
 # Data Sets
 mpg.csv and Iris.csv
+
+# External References
+1) Elbow method: https://en.wikipedia.org/wiki/Elbow_method_(clustering)
+2) Calinski-Harabasz: http://ethen8181.github.io/machine-learning/clustering_old/clustering/clustering.html
