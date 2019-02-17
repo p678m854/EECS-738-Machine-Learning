@@ -12,7 +12,7 @@ K-means with a K optimizer using the Calinski-Harabasz index
 2) flower_clusters.py
 
 # Data Sets
-mpg.csv and Iris.csv
+auto-mpg.csv and Iris.csv
 
 # External References
 1) Elbow method: https://en.wikipedia.org/wiki/Elbow_method_(clustering)
