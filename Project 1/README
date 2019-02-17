@@ -1,0 +1,11 @@
+# Author:
+Patrick McNamee
+
+# Project Partner
+Tim Fox (tfoxkustudent)
+
+# Algorithm
+K-means with a K optimizer using the Calinski-Harabasz index
+
+# Data Sets
+mpg.csv and Iris.csv
