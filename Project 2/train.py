@@ -1,18 +1,14 @@
 import string
 import numpy as np
-
-
-
-
+import csv
+import re
 
 #Get Data
-training_data = open('alllines.txt')
+training_data = open('./Project 2/alllines.txt')
 
 #Remove Commas
 def remove_commas(sentence):
     return sentence.translate(str.maketrans('', '', string.punctuation))
-
-
 
 #form dictionary to be able to compare two given states (markov)
 def form_dict(dictionary, key, value):
@@ -37,12 +33,52 @@ first_word = {}
 second_word = {}
 transition = {}
 
+actorMM = {}
+actorList = []
+trainingFile = './Project 2/Shakespeare_data.csv'
+
+def actSceneLine(strASL):
+    strASL = strASL.split('.')
+    scene = int(strASL[1])
+    return scene
+
+def returnLine(strLine):
+    return re.findall(r"[\w]+|[.,!?:]",strLine)
+
+def actorTrain(trainingFile):
+    with open(trainingFile) as csvfile: #open up Shakespeare
+        reader = csv.DictReader(csvfile)
+        prvScene = 0
+        previousActor = 'START SCENE'
+        for row in reader:
+            if row['ActSceneLine'] != '': # Lines only delivered
+
+                #Update check for new play scene
+                scene = actSceneLine(row['ActSceneLine'])
+                if scene != prvScene:
+                    if previousActor != 'START SCENE': # Exception only at beginning of file
+                        form_dict(actorMM, previousActor, 'END SCENE')
+                        form_dict(actorMM, 'START SCENE', 'END SCENE')
+                        previousActor = 'START SCENE' # No previous actor at start of scene 
+                prvScene = scene
+
+                # Forming model for actors
+                currentActor = row['Player']
+                currentLine = returnLine(row['PlayerLine'])
+                
+
+                form_dict(actorList,previousActor,currentActor)
+                previousActor = currentActor
+                
+                for word
+
 #Train our model
 def train():
     # we need to grab our our words to process, remove commas and make lowercase
     for line in training_data:
 
         words = remove_commas(line.rstrip().lower()).strip()
+        words = words.split()
        #Create indexes for words
         num_words = len(words)
         for i in range(num_words):
@@ -91,6 +127,7 @@ def random_word(dictionary):
 num_lines = 10
 
 def generate_text():
+    spaceDeliminator = " "
     for i in range(num_lines):
         sentence = []
         # Fist word
@@ -98,16 +135,19 @@ def generate_text():
         sentence.append(word0)
         # Second word
         word1 = random_word(second_word[word0])
+        sentence.append(spaceDeliminator)
         sentence.append(word1)
         #Remaining words until NEW LINE
         while True:
             word2 = random_word(transition[(word0, word1)])
             if word2 == "NEXT LINE":
                 break
+            sentence.append(spaceDeliminator)
             sentence.append(word2)
             word0 = word1
             word1 = word2
         print(''.join(sentence))
 
+actorTrain(trainingFile)
 train()
 generate_text()
