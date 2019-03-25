@@ -13,8 +13,21 @@ def remove_commas(sentence):
 #form dictionary to be able to compare two given states (markov)
 def form_dict(dictionary, key, value):
     if key not in dictionary:
-        dictionary[key] = []
-    dictionary[key].append(value)
+        dictionary[key] = {}
+    if value not in dictionary[key].keys():
+        dictionary[key][value] = 0    
+    dictionary[key][value] += 1
+
+def formMultipleFreqDictionary(dictionary, dictKey, key, value):
+    if dictKey not in dictionary:
+        dictionary[dictKey] = {}
+        actorList.append(dictKey)
+    if key not in dictionary[dictKey].keys():
+        dictionary[dictKey][key] = {}
+    if value not in dictionary[dictKey][key]:
+        dictionary[dictKey][key][value] = 0
+    dictionary[dictKey][key][value] += 1
+
 
 #We need to keep track of probabilities from each two pairs of words
 def probabilities(list):
@@ -50,6 +63,7 @@ def actorTrain(trainingFile):
         reader = csv.DictReader(csvfile)
         prvScene = 0
         previousActor = 'START SCENE'
+
         for row in reader:
             if row['ActSceneLine'] != '': # Lines only delivered
 
@@ -58,19 +72,70 @@ def actorTrain(trainingFile):
                 if scene != prvScene:
                     if previousActor != 'START SCENE': # Exception only at beginning of file
                         form_dict(actorMM, previousActor, 'END SCENE')
-                        form_dict(actorMM, 'START SCENE', 'END SCENE')
+                        form_dict(actorMM, 'END SCENE', 'START SCENE')
                         previousActor = 'START SCENE' # No previous actor at start of scene 
                 prvScene = scene
 
                 # Forming model for actors
                 currentActor = row['Player']
                 currentLine = returnLine(row['PlayerLine'])
-                
 
-                form_dict(actorList,previousActor,currentActor)
+                form_dict(actorMM,previousActor,currentActor)
                 previousActor = currentActor
-                
-                for word
+
+                # Forming model for player lines
+                num_words = len(currentLine)
+                for i in range(num_words):
+                    word = currentLine[i]
+                    #if index is zero, that means it is the first word
+                    # if i == 0:
+                    #     first_word[currentActor] = first_word[currentActor].get(word, 0) + 1
+                    # else:
+                    #create index for previous word
+                    
+                    if i != 0:
+                        previous_word = currentLine[i - 1]
+                    if i == 0:
+                        formMultipleFreqDictionary(first_word, currentActor, 'NEXT LINE', word)
+                    #if index is last word then we need to mark it with 'Next Line' in the dictionary
+                    elif i == num_words - 1:
+                        formMultipleFreqDictionary(transition, currentActor, (previous_word, word), 'NEXT LINE')
+                    #if index is 1 then it is the second word,  need to add to dictionary
+                    elif i == 1:
+                        formMultipleFreqDictionary(second_word, currentActor, previous_word, word)
+                    else:
+                        two_words_ago = currentLine[i - 2]
+                        formMultipleFreqDictionary(transition, currentActor, (two_words_ago, previous_word), word)
+        
+        #Normalizing the actor model distribution
+        for currentActor, nextActor in actorMM.items():
+            total_events = 0
+            for na in nextActor:
+                total_events += actorMM[currentActor][na]
+            for na in nextActor:
+                actorMM[currentActor][na] /= total_events
+        
+        # We have to Normalize the word distributions
+        for dictionary in [first_word, second_word, transition]:
+            #Going through every action in the dictionary
+            for actor in actorList:
+                #Sometimes an actor only has 1 line ever
+                if actor in dictionary.keys():
+                    # For every word/set of words
+                    for key, possibleValue in dictionary[actor].items():
+                        #Summation loop to find total events
+                        dictionary_total = 0
+                        for value in possibleValue:
+                            dictionary_total += dictionary[actor][key][value]
+                        #Loop to get realative frequency
+                        for value in possibleValue:
+                            dictionary[actor][key][value] /= dictionary_total
+
+        #for previousActor, currentActor in actorMM.items():
+         #   actorMM
+
+    print("training finished")                                  
+
 
 #Train our model
 def train():
@@ -99,7 +164,11 @@ def train():
                     two_words_ago = words[i - 2]
                     form_dict(transition, (two_words_ago, previous_word), word)
 
-    # We have to Normalize the distributions
+    # We have to normalize the word distributions
+    total_actors = sum(actorMM.values())
+    for key, value in actorMM.items():
+        actorMM[key] = value/total_actors
+
     first_word_total = sum(first_word.values())
     for key, value in first_word.items():
         first_word[key] = value / first_word_total
@@ -149,5 +218,7 @@ def generate_text():
         print(''.join(sentence))
 
 actorTrain(trainingFile)
-train()
-generate_text()
+print(actorMM)
+
+#train()
+#generate_text()
