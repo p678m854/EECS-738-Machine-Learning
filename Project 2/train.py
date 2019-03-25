@@ -4,12 +4,8 @@ import csv
 import re
 
 #Get Data
+trainingFile = './Project 2/Henry IV.csv'
 training_data = open('./Project 2/alllines.txt')
-
-
-#Remove Commas
-def remove_commas(sentence):
-    return sentence.translate(str.maketrans('', '', string.punctuation))
 
 #form dictionary to be able to compare two given states (markov)
 def form_dict(dictionary, key, value):
@@ -22,6 +18,7 @@ def form_dict(dictionary, key, value):
 def formMultipleFreqDictionary(dictionary, dictKey, key, value):
     if dictKey not in dictionary:
         dictionary[dictKey] = {}
+    if dictKey not in actorList: #Im assuming your only using this with actors
         actorList.append(dictKey)
     if key not in dictionary[dictKey].keys():
         dictionary[dictKey][key] = {}
@@ -29,21 +26,10 @@ def formMultipleFreqDictionary(dictionary, dictKey, key, value):
         dictionary[dictKey][key][value] = 0
     dictionary[dictKey][key][value] += 1
 
-
-#We need to keep track of probabilities from each two pairs of words
-def probabilities(list):
-    probability_list= {}
-    length_of_list = len(list)
-    for i in list:
-        probability_list[i] = probability_list.get(i, 0) + 1
-    for key, value in probability_list.items():
-        probability_list[key] = value / length_of_list
-    return probability_list
-
 #We have to have a place for the first and second words because they will not have a key value pair
 #aLso need to have a place when we transition to next line
 
-#Essentially these dictionaries hold the marginal probabilities for words by an actor
+#Essentially these dictionaries hold the conditional probabilities for words by an actor
 first_word = {}
 second_word = {}
 transition = {}
@@ -134,52 +120,6 @@ def actorTrain(trainingFile):
 
     print("training finished")                                  
 
-
-#Train our model
-def train():
-    # we need to grab our our words to process, remove commas and make lowercase
-    for line in training_data:
-
-        words = remove_commas(line.rstrip().lower()).strip()
-        words = words.split()
-       #Create indexes for words
-        num_words = len(words)
-        for i in range(num_words):
-            word = words[i]
-            #if index is zero, that means it is the first word
-            if i == 0:
-                first_word[word] = first_word.get(word, 0) + 1
-            else:
-                #create index for previous word
-                previous_word = words[i - 1]
-                #if index is last word then we need to mark it with 'Next Line' in the dictionary
-                if i == num_words - 1:
-                    form_dict(transition, (previous_word, word), 'NEXT LINE')
-                #if index is 1 then it is the second word,  need to add to dictionary
-                if i == 1:
-                    form_dict(second_word, previous_word, word)
-                else:
-                    two_words_ago = words[i - 2]
-                    form_dict(transition, (two_words_ago, previous_word), word)
-
-    # We have to normalize the word distributions
-    total_actors = sum(actorMM.values())
-    for key, value in actorMM.items():
-        actorMM[key] = value/total_actors
-
-    first_word_total = sum(first_word.values())
-    for key, value in first_word.items():
-        first_word[key] = value / first_word_total
-
-    for previous_word, next_word in second_word.items():
-        second_word[previous_word] = probabilities(next_word)
-
-    for two_words , next_word in transition.items():
-        transition[two_words]= probabilities(next_word)
-
-    print("training finished")
-
-
 #We Have to get a random word to generate our text
 def random_word(dictionary):
     p0 = np.random.random()
@@ -190,30 +130,30 @@ def random_word(dictionary):
             return key
     assert(False)
 
-
-num_lines = 10
-
-def generate_text():
+def generate_text(dictKey):
     spaceDeliminator = " "
-    for i in range(num_lines):
-        sentence = []
-        # Fist word
-        word0 = random_word(first_word)
-        sentence.append(word0)
-        # Second word
-        word1 = random_word(second_word[word0])
+    sentence = []
+    i = 0
+    # # Fist word
+    # word0 = random_word(first_word)
+    # sentence.append(word0)
+    # # Second word
+    # word1 = random_word(second_word[word0])
+    # sentence.append(spaceDeliminator)
+    # sentence.append(word1)
+    #Remaining words until NEW LINE
+    while True:
+        if i == 0:
+            word = 
+        elif: i ==1
+        else:
+        word2 = random_word(transition[(word0, word1)])
+            break
         sentence.append(spaceDeliminator)
-        sentence.append(word1)
-        #Remaining words until NEW LINE
-        while True:
-            word2 = random_word(transition[(word0, word1)])
-            if word2 == "NEXT LINE":
-                break
-            sentence.append(spaceDeliminator)
-            sentence.append(word2)
-            word0 = word1
-            word1 = word2
-        print(''.join(sentence))
+        sentence.append(word2)
+        word0 = word1
+        word1 = word2
+    print(''.join(sentence))
 
 #Pretty much following wikipedia's pseudo code
 def actorViterbi(testFile):
@@ -288,14 +228,12 @@ def actorViterbi(testFile):
                     MLvalue = transLH
                     MLindex = k
             
-            #Storing T1 and T2 Results
-            T1[j,i-1] = MLvalue*cumProbabilityProduct
-            T2[j,i-1] = MLindex
+            #Storing T1 and T2 ResultsE
+            T1[j,i] = MLvalue*cumProbabilityProduct
+            T2[j,i] = MLindex
         i +=1 #manually iterate
 
     #Time to do most likely path
-    print(T1)
-    print(T2)
     z = np.zeros((num_lines+1,1))
     x = [None] * (num_lines+1)
     for i in range(T1.shape[1]):
@@ -309,10 +247,36 @@ def actorViterbi(testFile):
     #return most likely path
     return x
 
+#Used when evaluating Viterbi algorithm
+def listDiff(x,y):
+    count = 0
+    for i in range(len(x)):
+        if x[i] != y[i]:
+            count += 1
+    
+    return count
+
+
 actorTrain(trainingFile)
 
 #Demos of Viterbi algorithm
-print(actorViterbi('./Project 2/firstLinesHenryIV.txt'))
-print(actorViterbi('./Project 2/kingLear22.txt'))
-#train()
-#generate_text()
+x1 = actorViterbi('./Project 2/firstLinesHenryIV.txt')
+print("From the first lines of Henry IV when only Henry IV is speaking: ")
+print(x1)
+
+x2 = actorViterbi('./Project 2/henryIV13.txt')
+correctX2 = ['HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
+    'NORTHUMBERLAND', 'NORTHUMBERLAND', 'NORTHUMBERLAND',\
+    'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
+    'NORTHUMBERLAND',\
+    'EARL OF WORCESTER',\
+    'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
+    'EARL OF WORCESTER', 'EARL OF WORCESTER',\
+    'NORTHUMBERLAND', 'NORTHUMBERLAND', 'NORTHUMBERLAND', 'NORTHUMBERLAND', 'NORTHUMBERLAND', 'NORTHUMBERLAND',\
+    'EARL OF WORCESTER', 'EARL OF WORCESTER']
+print("\nFrom Act 1, Scene 3, Lines 127-155 of Henry IV: ")
+print("Correct state path: ", correctX2)
+print("Viterbi state path: ", x2)
+print("Ratio correct: ", 1 - (listDiff(x2, correctX2)/len(x2)))
+
+generate_text(x2[-1])
