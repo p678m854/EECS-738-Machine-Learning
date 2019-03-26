@@ -4,7 +4,7 @@ import csv
 import re
 
 #Get Data
-trainingFile = './Project 2/Henry IV.csv'
+trainingFile = './Henry IV.csv'
 
 #form dictionary to be able to compare two given states (markov)
 def form_dict(dictionary, key, value):
@@ -293,11 +293,11 @@ actorTrain(trainingFile)
 
 print("Demoing Viterbi Algorithm. Hidden states are the actors speaking so we are trying to just the line to which actor")
 
-x1 = actorViterbi('./Project 2/firstLinesHenryIV.txt')
+x1 = actorViterbi('./firstLinesHenryIV.txt')
 print("\nFrom the first lines of Henry IV when only Henry IV is speaking: ")
 print("Actor speaking: ", x1)
 
-x2 = actorViterbi('./Project 2/henryIV13.txt')
+x2 = actorViterbi('./henryIV13.txt')
 correctX2 = ['HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
     'NORTHUMBERLAND', 'NORTHUMBERLAND', 'NORTHUMBERLAND',\
     'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
