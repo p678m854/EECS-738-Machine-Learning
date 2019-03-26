@@ -5,7 +5,6 @@ import re
 
 #Get Data
 trainingFile = './Project 2/Henry IV.csv'
-training_data = open('./Project 2/alllines.txt')
 
 #form dictionary to be able to compare two given states (markov)
 def form_dict(dictionary, key, value):
