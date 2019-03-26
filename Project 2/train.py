@@ -134,25 +134,56 @@ def generate_text(dictKey):
     spaceDeliminator = " "
     sentence = []
     i = 0
-    # # Fist word
-    # word0 = random_word(first_word)
-    # sentence.append(word0)
-    # # Second word
-    # word1 = random_word(second_word[word0])
-    # sentence.append(spaceDeliminator)
-    # sentence.append(word1)
-    #Remaining words until NEW LINE
+
+    MLword = ''
+    prevWord = ''
+    prevPrevWord = ''
     while True:
+        #reset probability
+        MLprob = 0
+        
         if i == 0:
-            word = 
-        elif: i ==1
+            for word in first_word[dictKey]['NEXT LINE'].keys():
+                if first_word[dictKey]['NEXT LINE'][word] > MLprob:
+                    MLprob = first_word[dictKey]['NEXT LINE'][word]
+                    MLword = word
+        elif i == 1:
+            prevWord = MLword
+            MLprob = 0
+            for word in second_word[dictKey][prevWord].keys():
+                if second_word[dictKey][prevWord][word] > MLprob:
+                    MLprob = second_word[dictKey][prevWord][word]
+                    MLword = word
         else:
-        word2 = random_word(transition[(word0, word1)])
+            prevPrevWord = prevWord
+            prevWord = MLword
+            if (prevPrevWord, prevWord) in transition[dictKey].keys():
+                for word in transition[dictKey][(prevPrevWord, prevWord)].keys():
+                    if transition[dictKey][(prevPrevWord, prevWord)][word] > MLprob:
+                        MLprob = transition[dictKey][(prevPrevWord, prevWord)][word]
+                        MLword = word
+            elif prevWord in second_word[dictKey].keys():
+                for word in transition[dictKey][prevWord].keys():
+                    if transition[dictKey][(prevPrevWord, prevWord)][word] > MLprob:
+                        MLprob = transition[dictKey][(prevPrevWord, prevWord)][word]
+                        MLword = word
+            else:
+                MLword = 'NEXT LINE'
+
+            if MLword in transition[dictKey].keys():
+                if 'NEXT LINE' in transition[dictKey][MLword].keys():
+                    if MLprob < transition[dictKey][word]['NEXT LINE']:
+                        MLword = 'NEXTLINE'
+
+        if MLword == 'NEXT LINE':
             break
-        sentence.append(spaceDeliminator)
-        sentence.append(word2)
-        word0 = word1
-        word1 = word2
+        else:
+            if i != 0:
+                if MLword not in [',', '?', '!', '.', ':']:
+                    sentence.append(spaceDeliminator)
+            sentence.append(MLword)
+        i += 1
+
     print(''.join(sentence))
 
 #Pretty much following wikipedia's pseudo code
@@ -260,9 +291,12 @@ def listDiff(x,y):
 actorTrain(trainingFile)
 
 #Demos of Viterbi algorithm
+
+print("Demoing Viterbi Algorithm. Hidden states are the actors speaking so we are trying to just the line to which actor")
+
 x1 = actorViterbi('./Project 2/firstLinesHenryIV.txt')
-print("From the first lines of Henry IV when only Henry IV is speaking: ")
-print(x1)
+print("\nFrom the first lines of Henry IV when only Henry IV is speaking: ")
+print("Actor speaking: ", x1)
 
 x2 = actorViterbi('./Project 2/henryIV13.txt')
 correctX2 = ['HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
@@ -276,7 +310,8 @@ correctX2 = ['HOTSPUR', 'HOTSPUR', 'HOTSPUR', 'HOTSPUR',\
     'EARL OF WORCESTER', 'EARL OF WORCESTER']
 print("\nFrom Act 1, Scene 3, Lines 127-155 of Henry IV: ")
 print("Correct state path: ", correctX2)
-print("Viterbi state path: ", x2)
+print("\nViterbi state path: ", x2)
 print("Ratio correct: ", 1 - (listDiff(x2, correctX2)/len(x2)))
 
+print("\nPredicting the next line (1.3.156): ")
 generate_text(x2[-1])
