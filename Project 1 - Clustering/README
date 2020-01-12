@@ -1,0 +1,29 @@
+# Author:
+Patrick McNamee
+
+# Project Partner
+Tim Fox (tfoxkustudent)
+
+# Algorithm
+K-means with a K optimizer using the Calinski-Harabasz index
+
+# Run Files
+1) cluster_cylinders.py
+2) flower_clusters.py
+
+# Directions to Run
+1) Download all files into a local directory.
+2) Run either run file in a python terminal or IDE
+
+# Data Sets
+auto-mpg.csv and Iris.csv
+
+# External References
+1) Elbow method: https://en.wikipedia.org/wiki/Elbow_method_(clustering)
+2) Calinski-Harabasz: http://ethen8181.github.io/machine-learning/clustering_old/clustering/clustering.html
+
+# K-means algorithm
+K-means aloghthm is a clustering algorithm that divides a data set into an integer K clusters. The clusters are initialized at random from the data set and then placed in to a loop. The loop first divides the data set into subsets based on the closest cluster and then the clusters have their point updated based on the mean of the subsets. This is repeated a set number of times and should be convergent. A set number of iterations was chosen as it was easiest to code rather than calculating differences in the clusters.
+
+# K-means optimization
+The way to optimize K-means is to optimize the number of clusters selected. Each data set has a total sum of squares (TSS) of vector norms from the data set's mean. As clusters are used, the residual sum of squares (RSS) of the subsets norms from the cluster mean can be used to judge a convergence limit. This technique is based on the "elbow" method as described in an external reference. The algorithm keeps adding to K until the RSS/TSS reaches a lower threshold. At this point the algorithm evaluates each K's Calinski-Harabasz index to determine the optimal K which occurs at the maximum Calinski-Harabasz score. Since the Calinski-Harabasz index seeks to minimize the amount of clusters as well as RSS of the data, this seeks a good middle ground for determining the optimal number of clusters. 
