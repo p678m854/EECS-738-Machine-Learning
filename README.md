@@ -1,6 +1,7 @@
 # EECS-738-Machine-Learning
 
 Author: Patrick McNamee
+
 Partner: Tim Fox
 
 ## Description
